@@ -31,6 +31,7 @@ setup(
     ],
     install_requires=[
         'redis',
+        'redis-py-cluster',
         'celery',
     ],
     tests_require=[

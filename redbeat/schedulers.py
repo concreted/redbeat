@@ -29,6 +29,7 @@ from celery.app import app_or_default
 from celery.five import values
 
 from redis.client import StrictRedis
+from rediscluster import StrictRedisCluster
 
 from .decoder import RedBeatJSONEncoder, RedBeatJSONDecoder
 
@@ -55,8 +56,12 @@ def redis(app=None):
     app = app_or_default(app)
     conf = ensure_conf(app)
     if not hasattr(app, 'redbeat_redis') or app.redbeat_redis is None:
-        app.redbeat_redis = StrictRedis.from_url(conf.redis_url,
-                                                 decode_responses=True)
+        if conf.is_redis_cluster:
+            app.redbeat_redis = StrictRedisCluster.from_url(conf.redis_url,
+                                                            decode_responses=True)
+        else:
+            app.redbeat_redis = StrictRedis.from_url(conf.redis_url,
+                                                     decode_responses=True)
 
     return app.redbeat_redis
 
@@ -86,6 +91,7 @@ class RedBeatConfig(object):
         self.lock_key = self.either_or('redbeat_lock_key', self.key_prefix + ':lock')
         self.lock_timeout = self.either_or('redbeat_lock_timeout', None)
         self.redis_url = self.either_or('redbeat_redis_url', app.conf['BROKER_URL'])
+        self.is_redis_cluster = self.either_or('redbeat_is_redis_cluster', False)
 
     @property
     def schedule(self):
@@ -352,6 +358,7 @@ class RedBeatScheduler(Scheduler):
             try:
                 result = self.apply_async(entry, **kwargs)
             except Exception as exc:
+                # TODO: Failing here with Message Error: Couldn't apply scheduled task <task id>: CROSSSLOT Keys in request don't hash to the same slot
                 logger.exception('Message Error: %s', exc)
             else:
                 logger.debug('%s sent. id->%s', entry.task, result.id)
