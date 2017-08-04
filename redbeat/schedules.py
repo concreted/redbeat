@@ -47,8 +47,8 @@ class rrule(schedule):
             assert freq_str in rrule.FREQ_MAP
             freq = rrule.FREQ_MAP[freq_str]
 
-        dtstart = self.maybe_make_aware(dtstart) if dtstart else \
-            self.maybe_make_aware(self.now())
+        now = self.maybe_make_aware(self.now())
+        dtstart = self.maybe_make_aware(dtstart) if dtstart else now
         until = self.maybe_make_aware(until) if until else None
 
         self.freq = freq
@@ -67,13 +67,27 @@ class rrule(schedule):
         self.byhour = byhour
         self.byminute = byminute
         self.bysecond = bysecond
-        self.rrule = dateutil_rrule(freq, dtstart, interval, wkst, count, until,
-                                    bysetpos, bymonth, bymonthday, byyearday, byeaster,
-                                    byweekno, byweekday, byhour, byminute, bysecond)
+
+    def rrule(self, relative_start=None):
+        now = self.maybe_make_aware(self.now())
+
+        # Calculate the rrule's start time. This is done to avoid unnecessary
+        # computation of intermediate rrule occurrences when the dtstart
+        # is much earlier than the next occurrence that's needed.
+        # 1) If the rrule's start time has already passed, set it to now.
+        rrule_dtstart = self.dtstart if self.dtstart > now else now
+        # 2) If the time after which to look for the next occurrence is
+        # after the start time, set the start time to it.
+        if relative_start and relative_start > rrule_dtstart:
+            rrule_dtstart = relative_start
+        return dateutil_rrule(
+            self.freq, rrule_dtstart, self.interval, self.wkst, self.count, self.until,
+            self.bysetpos, self.bymonth, self.bymonthday, self.byyearday, self.byeaster,
+            self.byweekno, self.byweekday, self.byhour, self.byminute, self.bysecond)
 
     def remaining_estimate(self, last_run_at):
         last_run_at = self.maybe_make_aware(last_run_at)
-        next_run = self.rrule.after(last_run_at)
+        next_run = self.rrule(relative_start=last_run_at).after(last_run_at)
         if next_run:
             next_run = self.maybe_make_aware(next_run)
             now = self.maybe_make_aware(self.now())
@@ -99,4 +113,4 @@ class rrule(schedule):
         return self.RRULE_REPR.format(self)
 
     def __reduce__(self):
-        return (self.__class__, (self.rrule), None)
+        return (self.__class__, (self.rrule()), None)

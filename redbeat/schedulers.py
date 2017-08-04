@@ -192,10 +192,11 @@ class RedBeatSchedulerEntry(ScheduleEntry):
 
     @property
     def score(self):
-        if self.due_at is None:
+        due_at = self.due_at
+        if due_at is None:
             # Scores < zero are ignored on each tick.
             return -1
-        return to_timestamp(self.due_at)
+        return to_timestamp(due_at)
 
     @property
     def rank(self):
