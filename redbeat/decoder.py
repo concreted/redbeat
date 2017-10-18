@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import time
+import dateutil.parser
 from datetime import datetime
 
 try:
@@ -35,7 +36,7 @@ class RedBeatJSONDecoder(json.JSONDecoder):
             # Decode timestamp values into datetime objects
             for key in ['dtstart', 'until']:
                 if d[key] is not None:
-                    d[key] = datetime.fromtimestamp(d[key])
+                    d[key] = dateutil.parser.parse(d[key])
             return rrule(**d)
 
         d['__type__'] = objtype
@@ -72,10 +73,10 @@ class RedBeatJSONEncoder(json.JSONEncoder):
                 'relative': bool(obj.relative),
             }
         if isinstance(obj, rrule):
-            # Convert datetime objects to timestamps
-            dtstart_ts = time.mktime(obj.dtstart.timetuple()) \
+            # Convert datetime objects to ISO8601 timestamps
+            dtstart_ts = obj.dtstart.isoformat() \
                 if obj.dtstart else None
-            until_ts = time.mktime(obj.until.timetuple()) \
+            until_ts = obj.until.isoformat() \
                 if obj.until else None
 
             return {
@@ -95,6 +96,7 @@ class RedBeatJSONEncoder(json.JSONEncoder):
                 'byweekday': obj.byweekday,
                 'byhour': obj.byhour,
                 'byminute': obj.byminute,
-                'bysecond': obj.bysecond
+                'bysecond': obj.bysecond,
+                'tzid': obj.tzid
             }
         return super(RedBeatJSONEncoder, self).default(obj)

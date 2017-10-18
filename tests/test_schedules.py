@@ -85,3 +85,25 @@ class test_rrule_is_due(TestCase):
         is_due, next = r.is_due(datetime.utcnow() + timedelta(minutes=1))
         self.assertFalse(is_due)
         self.assertEquals(next, None)
+
+
+@patch.object(rrule, 'now', datetime.utcnow)
+@patch.object(rrule, 'utc_enabled', True)
+@patch.object(rrule, 'tz', timezone.utc)
+class test_rrule_dst(TestCase):
+
+    def test_freq__after_dst_end(self):
+        # Local time - DST ends one day later
+        local_start = datetime(2017, 11, 4, 12, 0)
+        tzid = 'America/Los_Angeles'
+        r = rrule('DAILY', dtstart=local_start, count=2, tzid=tzid)
+        # eta from one minute before start, in UTC
+        with patch.object(rrule, 'now', lambda _: datetime(2017, 11, 4, 18, 59)):
+            eta = r.remaining_estimate(datetime(2017, 11, 4, 18, 59))
+            self.assertEquals(eta.total_seconds(), 60)
+
+        # eta from same time UTC next day
+        # should be one hour longer due to DST ending
+        with patch.object(rrule, 'now', lambda _: datetime(2017, 11, 5, 18, 59)):
+            eta = r.remaining_estimate(datetime(2017, 11, 5, 18, 59))
+            self.assertEquals(eta.total_seconds(), 60 + (60 * 60))
