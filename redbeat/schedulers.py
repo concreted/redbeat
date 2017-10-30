@@ -3,10 +3,11 @@
 # of the License at http://www.apache.org/licenses/LICENSE-2.0
 # Copyright 2015 Marc Sibson
 
+from __future__ import absolute_import
+
 import newrelic.agent
 newrelic.agent.initialize('./newrelic_redbeat.ini')
 
-from __future__ import absolute_import
 
 import time
 import warnings
