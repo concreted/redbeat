@@ -6,7 +6,10 @@
 from __future__ import absolute_import
 
 import newrelic.agent
-newrelic.agent.initialize('./newrelic_redbeat.ini')
+# try:
+#     newrelic.agent.initialize('./newrelic_redbeat.ini')
+# except:
+#     print 'New Relic already initialized'
 
 
 import time
@@ -356,6 +359,7 @@ class RedBeatScheduler(Scheduler):
 
         return d
 
+    @newrelic.agent.background_task(name='maybe_due', group='Redbeat')
     def maybe_due(self, entry, **kwargs):
         is_due, next_time_to_run = entry.is_due()
 
@@ -369,7 +373,7 @@ class RedBeatScheduler(Scheduler):
                 logger.debug('%s sent. id->%s', entry.task, result.id)
         return next_time_to_run
 
-    @newrelic.agent.background_task()
+    @newrelic.agent.background_task(name='tick', group='Redbeat')
     def tick(self, min=min, **kwargs):
         startTime = datetime.now()
         if self.lock:
