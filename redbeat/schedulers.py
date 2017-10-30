@@ -5,6 +5,8 @@
 
 from __future__ import absolute_import
 
+import newrelic.agent
+
 import time
 import warnings
 from datetime import datetime, MINYEAR
@@ -352,6 +354,7 @@ class RedBeatScheduler(Scheduler):
 
         return d
 
+    @newrelic.agent.background_task(name='maybe_due', group='Redbeat')
     def maybe_due(self, entry, **kwargs):
         is_due, next_time_to_run = entry.is_due()
 
@@ -365,6 +368,7 @@ class RedBeatScheduler(Scheduler):
                 logger.debug('%s sent. id->%s', entry.task, result.id)
         return next_time_to_run
 
+    @newrelic.agent.background_task(name='tick', group='Redbeat')
     def tick(self, min=min, **kwargs):
         startTime = datetime.now()
         if self.lock:
@@ -383,7 +387,7 @@ class RedBeatScheduler(Scheduler):
         result = min(remaining_times + [self.max_interval])
         endTime = datetime.now()
         timeTaken = endTime - startTime
-        logger.info("tick() took %i seconds to complete" % timeTaken.total_seconds())
+        logger.info("tick() took %f seconds to complete" % timeTaken.total_seconds())
         return result
 
     def close(self):
