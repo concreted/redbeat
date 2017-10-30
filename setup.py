@@ -32,7 +32,8 @@ setup(
     install_requires=[
         'redis',
         'celery',
-        'python-dateutil'
+        'python-dateutil',
+        'newrelic'
     ],
     tests_require=[
         'pytest',

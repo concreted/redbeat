@@ -3,6 +3,9 @@
 # of the License at http://www.apache.org/licenses/LICENSE-2.0
 # Copyright 2015 Marc Sibson
 
+import newrelic.agent
+newrelic.agent.initialize('./newrelic_redbeat.ini')
+
 from __future__ import absolute_import
 
 import time
@@ -365,6 +368,7 @@ class RedBeatScheduler(Scheduler):
                 logger.debug('%s sent. id->%s', entry.task, result.id)
         return next_time_to_run
 
+    @newrelic.agent.background_task()
     def tick(self, min=min, **kwargs):
         startTime = datetime.now()
         if self.lock:
