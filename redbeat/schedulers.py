@@ -348,6 +348,8 @@ class RedBeatScheduler(Scheduler):
 
             d[entry.name] = entry
 
+        logger.info("Total items in schedule: %i" % len(d.keys()))
+
         return d
 
     def maybe_due(self, entry, **kwargs):
@@ -364,6 +366,7 @@ class RedBeatScheduler(Scheduler):
         return next_time_to_run
 
     def tick(self, min=min, **kwargs):
+        startTime = datetime.now()
         if self.lock:
             logger.debug('beat: Extending lock...')
             redis(self.app).pexpire(self.lock_key, int(self.lock_timeout * 1000))
@@ -377,7 +380,11 @@ class RedBeatScheduler(Scheduler):
         except RuntimeError:
             logger.debug('beat: RuntimeError', exc_info=True)
 
-        return min(remaining_times + [self.max_interval])
+        result = min(remaining_times + [self.max_interval])
+        endTime = datetime.now()
+        timeTaken = endTime - startTime
+        logger.info("tick() took %i seconds to complete" % timeTaken.total_seconds())
+        return result
 
     def close(self):
         if self.lock:
