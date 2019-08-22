@@ -77,7 +77,7 @@ class rrule(schedule):
         self.last_run_at = datetime(MINYEAR, 1, 2, tzinfo=self.tz)
 
     def remaining_estimate(self, last_run_at):
-        last_run_at = self.maybe_make_aware(last_run_at)
+        last_run_at = self.maybe_make_aware(self.last_run_at)
         next_run = self.rrule.after(last_run_at)
         # self.last_run_at = next_run
         # print "next run:", next_run
@@ -89,6 +89,7 @@ class rrule(schedule):
         return None
 
     def is_due(self, last_run_at):
+        print "CALLED IS DUE......"
 
         rem_delta = self.remaining_estimate(self.last_run_at)
 

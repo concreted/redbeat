@@ -60,7 +60,7 @@ class RedBeatJSONDecoder(json.JSONDecoder):
         if objtype == 'rrule':
             # Decode timestamp values into datetime objects
             for key, tz_key in [
-                    ('dtstart', 'dtstart_tz'), ('until', 'until_tz')]:
+                    ('dtstart', 'dtstart_tz'), ('until', 'until_tz'), ('last_run_at', 'last_run_at_tz')]:
                 timestamp = d.get(key)
                 tz_minutes = d.pop(tz_key, 0)
                 if timestamp is not None:
@@ -122,8 +122,9 @@ class RedBeatJSONEncoder(json.JSONEncoder):
                 res['until'] = to_timestamp(obj.until)
                 res['until_tz'] = get_utcoffset_minutes(obj.until)
 
-            # if obj.last_run_at:
-
+            if obj.last_run_at:
+                res['last_run_at'] = to_timestamp(obj.last_run_at)
+                res['last_run_at_tz'] = get_utcoffset_minutes(obj.last_run_at)
 
             return res
         if isinstance(obj, schedule):
