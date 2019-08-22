@@ -66,6 +66,8 @@ Once you have the source you can run the tests with the following commands::
 
     pip install -r requirements.dev.txt
     py.test tests
+    # or:
+    python -m pytest tests
 
 You can also quickly fire up a sample Beat instance with::
 

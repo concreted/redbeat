@@ -1,4 +1,5 @@
 import celery
+from datetime import datetime, MINYEAR, timedelta
 from dateutil.rrule import (
     rrule as dateutil_rrule,
     YEARLY,
@@ -39,6 +40,7 @@ class rrule(schedule):
                  bymonth=None, bymonthday=None, byyearday=None, byeaster=None,
                  byweekno=None, byweekday=None,
                  byhour=None, byminute=None, bysecond=None,
+                 last_run_at=None,
                  **kwargs):
         super(rrule, self).__init__(**kwargs)
 
@@ -71,9 +73,14 @@ class rrule(schedule):
                                     bysetpos, bymonth, bymonthday, byyearday, byeaster,
                                     byweekno, byweekday, byhour, byminute, bysecond)
 
+        # Internal state
+        self.last_run_at = None
+
     def remaining_estimate(self, last_run_at):
         last_run_at = self.maybe_make_aware(last_run_at)
         next_run = self.rrule.after(last_run_at)
+        # self.last_run_at = next_run
+        print "next run:", next_run
         if next_run:
             next_run = self.maybe_make_aware(next_run)
             now = self.maybe_make_aware(self.now())
@@ -82,12 +89,20 @@ class rrule(schedule):
         return None
 
     def is_due(self, last_run_at):
-        rem_delta = self.remaining_estimate(last_run_at)
+        # hack for rrules
+        if self.last_run_at is None:
+            # if we never ran, calculate delta based on epoch.
+            self.last_run_at = datetime(MINYEAR, 1, 2, tzinfo=self.tz)
+
+        rem_delta = self.remaining_estimate(self.last_run_at)
+
         if rem_delta is not None:
             rem = max(rem_delta.total_seconds(), 0)
             due = rem == 0
             if due:
-                rem_delta = self.remaining_estimate(self.now())
+                self.last_run_at = self.rrule.after(self.last_run_at) - timedelta(microseconds=1)
+                rem_delta = self.remaining_estimate(self.last_run_at)
+                print "next rem_delta:", rem_delta
                 if rem_delta is not None:
                     rem = max(rem_delta.total_seconds(), 0)
                 else:
