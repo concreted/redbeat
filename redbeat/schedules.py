@@ -74,7 +74,7 @@ class rrule(schedule):
                                     byweekno, byweekday, byhour, byminute, bysecond)
 
         # Internal state
-        self.last_run_at = None
+        self.last_run_at = datetime(MINYEAR, 1, 2, tzinfo=self.tz)
 
     def remaining_estimate(self, last_run_at):
         last_run_at = self.maybe_make_aware(last_run_at)
@@ -89,10 +89,6 @@ class rrule(schedule):
         return None
 
     def is_due(self, last_run_at):
-        # hack for rrules
-        if self.last_run_at is None:
-            # if we never ran, calculate delta based on epoch.
-            self.last_run_at = datetime(MINYEAR, 1, 2, tzinfo=self.tz)
 
         rem_delta = self.remaining_estimate(self.last_run_at)
 

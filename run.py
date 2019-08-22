@@ -27,9 +27,9 @@ def try_now():
     print(schedule) # <rrule: freq: 5, dtstart: 2017-12-09 20:17:03.882+00:00, interval: 3, count: 4, ...>
     entry = RedBeatSchedulerEntry('mee-wow-18', test.name, schedule, app=app)
 
-    # test_entry(entry)
+    test_entry(entry)
 
-    entry.save()
+    # entry.save()
 
 
 def try_before():
@@ -43,5 +43,5 @@ def try_before():
 
 
 if __name__ == '__main__':
-    try_now()
-    # try_before()
+    # try_now()
+    try_before()

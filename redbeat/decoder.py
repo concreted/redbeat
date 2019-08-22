@@ -122,6 +122,9 @@ class RedBeatJSONEncoder(json.JSONEncoder):
                 res['until'] = to_timestamp(obj.until)
                 res['until_tz'] = get_utcoffset_minutes(obj.until)
 
+            # if obj.last_run_at:
+
+
             return res
         if isinstance(obj, schedule):
             return {
