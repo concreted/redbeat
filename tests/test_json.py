@@ -62,7 +62,7 @@ class JSONTestCase(TestCase):
             'dtstart_tz': 0,
             'interval': 1,
             'wkst': None,
-            'count': 1,
+            'count': None,
             'until': 1451566762,
             'until_tz': 0,
             'bysetpos': None,
@@ -107,9 +107,9 @@ class RedBeatJSONEncoderTestCase(JSONTestCase):
             'MINUTELY',
             dtstart=datetime(2015, 12, 30, 12, 59, 22, tzinfo=timezone.utc),
             until=datetime(2015, 12, 31, 12, 59, 22, tzinfo=timezone.utc),
-            count=1,
             )
         result = self.dumps(r)
+        print result
         self.assertEqual(json.loads(result), self.rrule())
 
     def test_rrule_timezone(self):
