@@ -249,10 +249,10 @@ class RedBeatSchedulerEntry(ScheduleEntry):
         entry = cls(app=app, **definition)
         # celery.ScheduleEntry sets last_run_at = utcnow(), which is confusing and wrong
         entry.last_run_at = meta['last_run_at']
-        print "++++++++++++++++++++"
-        print "KEY:", key
-        print meta
-        print meta['last_run_at']
+        # print "++++++++++++++++++++"
+        # print "KEY:", key
+        # print meta
+        # print meta['last_run_at']
 
         return entry
 
@@ -289,7 +289,7 @@ class RedBeatSchedulerEntry(ScheduleEntry):
         return get_redis(self.app).zrank(self.app.redbeat_conf.schedule_key, self.key)
 
     def save(self):
-        print "called save!!!!!!!!!" , self.name
+        # print "called save!!!!!!!!!" , self.name
         definition = {
             'name': self.name,
             'task': self.task,
@@ -350,9 +350,6 @@ class RedBeatSchedulerEntry(ScheduleEntry):
         if not self.enabled:
             return False, 5.0  # 5 second delay for re-enable.
 
-        print "================="
-        print self
-        print self.last_run_at
         return self.schedule.is_due(self.last_run_at or datetime(MINYEAR, 1, 2, tzinfo=self.schedule.tz))
 
 
@@ -465,10 +462,10 @@ class RedBeatScheduler(Scheduler):
         remaining_times = []
         try:
             for entry in values(self.schedule):
-                # print "============"
+                print "============"
                 # print entry
                 next_time_to_run = self.maybe_due(entry, **self._maybe_due_kwargs)
-                # print next_time_to_run
+                print next_time_to_run
                 if next_time_to_run:
                     remaining_times.append(next_time_to_run)
         except RuntimeError:

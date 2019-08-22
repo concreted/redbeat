@@ -80,7 +80,7 @@ class rrule(schedule):
         last_run_at = self.maybe_make_aware(last_run_at)
         next_run = self.rrule.after(last_run_at)
         # self.last_run_at = next_run
-        print "next run:", next_run
+        # print "next run:", next_run
         if next_run:
             next_run = self.maybe_make_aware(next_run)
             now = self.maybe_make_aware(self.now())
@@ -100,9 +100,9 @@ class rrule(schedule):
             rem = max(rem_delta.total_seconds(), 0)
             due = rem == 0
             if due:
-                self.last_run_at = self.rrule.after(self.last_run_at) - timedelta(microseconds=1)
+                self.last_run_at = self.rrule.after(self.last_run_at)
                 rem_delta = self.remaining_estimate(self.last_run_at)
-                print "next rem_delta:", rem_delta
+                # print "next rem_delta:", rem_delta
                 if rem_delta is not None:
                     rem = max(rem_delta.total_seconds(), 0)
                 else:
